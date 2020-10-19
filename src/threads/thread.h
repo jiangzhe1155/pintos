@@ -141,4 +141,6 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void thread_ticks_block_check(struct thread *t, void *aux);
+
+bool thread_priority_compare_func(struct list_elem *a,struct list_elem *b,void *aux);
 #endif /* threads/thread.h */
