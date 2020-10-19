@@ -582,3 +582,13 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+//对线程进行唤醒函数
+void thread_ticks_block_check(struct thread *t, void *aux){
+    if(t->status == THREAD_BLOCKED && t->ticks_block > 0){
+        t->ticks_block--;
+        if(t->ticks_block == 0){
+            thread_unblock (t);
+        }
+    }
+}

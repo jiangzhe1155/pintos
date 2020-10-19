@@ -87,13 +87,17 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-timer_sleep (int64_t ticks) 
-{
-  int64_t start = timer_ticks ();
-
-  ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+timer_sleep(int64_t ticks) {
+    if(ticks <= 0){
+        return ;
+    }
+    //获取当前线程
+    ASSERT(intr_get_level() == INTR_ON);
+    intr_disable();
+    struct thread *cur = thread_current();
+    cur->ticks_block = ticks;
+    thread_block();
+    intr_enable();
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -168,10 +172,11 @@ timer_print_stats (void)
 
 /* Timer interrupt handler. */
 static void
-timer_interrupt (struct intr_frame *args UNUSED)
-{
-  ticks++;
-  thread_tick ();
+timer_interrupt(struct intr_frame *args UNUSED) {
+    ticks++;
+    thread_tick();
+    //对阻塞线程进行唤醒
+    thread_foreach(thread_ticks_block_check,NULL);
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
