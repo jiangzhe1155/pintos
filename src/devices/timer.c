@@ -174,9 +174,9 @@ timer_print_stats (void)
 static void
 timer_interrupt(struct intr_frame *args UNUSED) {
     ticks++;
-    thread_tick();
     //对阻塞线程进行唤醒
     thread_foreach(thread_ticks_block_check,NULL);
+    thread_tick();
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
