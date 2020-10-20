@@ -563,7 +563,10 @@ schedule (void)
   ASSERT (is_thread (next));
 
   if (cur != next)
+      //返回值 prev == cur
     prev = switch_threads (cur, next);
+
+  //线程调度收尾工作
   thread_schedule_tail (prev);
 }
 
@@ -596,8 +599,5 @@ void thread_ticks_block_check(struct thread *t, void *aux){
 }
 
 bool thread_priority_compare_func(struct list_elem *a , struct list_elem *b, void *aux) {
-     struct thread *thread_a = list_entry (a, struct thread, elem);
-     struct thread *thread_b = list_entry (b, struct thread, elem);
-
-     return thread_a->priority < thread_b->priority;
+     return list_entry (a, struct thread, elem)->priority > list_entry (b, struct thread, elem)->priority;
 }
