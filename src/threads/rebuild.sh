@@ -2,5 +2,5 @@
 
 echo $(make clean)
 echo $(make)
-echo $(pintos --gdb -- run alarm-priority)
+echo $(pintos --gdb -- run priority-change)
 sleep 3

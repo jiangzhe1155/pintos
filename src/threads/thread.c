@@ -201,6 +201,10 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  if(priority >= thread_current()->priority){
+      //主动调度
+      thread_yield();
+  }
   return tid;
 }
 
@@ -337,7 +341,15 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority)
 {
-  thread_current ()->priority = new_priority;
+    struct thread *t = thread_current();
+    int old_priority = t->priority;
+    t->priority = new_priority;
+
+    if(new_priority <= old_priority){
+        //重新调度
+        thread_yield();
+    }
+
 }
 
 /* Returns the current thread's priority. */
