@@ -88,6 +88,9 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int init_priority;                  /* 初始优先级 */
+    struct lock *wait_lock;             /* 需要等待的锁对象 */
+    struct list hold_locks;             /* 占有的锁对象 */
     struct list_elem allelem;           /* List element for all threads list. */
 
     /* Shared between thread.c and synch.c. */
@@ -141,6 +144,15 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void thread_ticks_block_check(struct thread *t, void *aux);
+
+bool thread_priority_compare_func(struct list_elem *a,struct list_elem *b,void *aux);
+
+void thread_reorder_priority(struct thread *t);
+
+
+int thread_current_max_priority(struct thread *t);
+
+void thread_donate(struct thread *t,int priority);
 
 bool thread_priority_compare_func(struct list_elem *a,struct list_elem *b,void *aux);
 #endif /* threads/thread.h */
