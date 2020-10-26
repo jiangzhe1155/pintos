@@ -13,7 +13,7 @@
 static thread_func acquire_thread_func;
 
 void
-test_priority_donate_lower (void) 
+test_priority_donate_lower (void)
 {
   struct lock lock;
 

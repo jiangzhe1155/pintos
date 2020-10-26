@@ -31,17 +31,12 @@ test_priority_donate_one (void)
 
   lock_init (&lock);
   lock_acquire (&lock);
-  //（1）acquire1 优先级比 main（31) 高，先执行。
   thread_create ("acquire1", PRI_DEFAULT + 1, acquire1_thread_func, &lock);
   msg ("This thread should have priority %d.  Actual priority: %d.",
        PRI_DEFAULT + 1, thread_get_priority ());
-  //（3）acquire2 优先级比 main（32) 高，先执行。
   thread_create ("acquire2", PRI_DEFAULT + 2, acquire2_thread_func, &lock);
   msg ("This thread should have priority %d.  Actual priority: %d.",
        PRI_DEFAULT + 2, thread_get_priority ());
-  //（5）释放锁，将main线程的优先级重置。
-  //    由于lock的等待队列中，acquire2 优先级比 acquire1高,所以先被唤醒。
-  //    由于acquire2 的优先级比main高，所以先被调度。
   lock_release (&lock);
   msg ("acquire2, acquire1 must already have finished, in that order.");
   msg ("This should be the last line before finishing this test.");
@@ -51,11 +46,9 @@ static void
 acquire1_thread_func (void *lock_) 
 {
   struct lock *lock = lock_;
-  //（2）此时lock已经被 main 占用，acquire1 加入到锁的等待队列中。
-  //   同时将 acquire1 的优先级捐赠给main
+
   lock_acquire (lock);
   msg ("acquire1: got the lock");
-  //（7）释放lock,acquire1 的 优先级比 main 高，继续执行直到结束。
   lock_release (lock);
   msg ("acquire1: done");
 }
@@ -64,11 +57,9 @@ static void
 acquire2_thread_func (void *lock_) 
 {
   struct lock *lock = lock_;
-  //（4）此时lock已经被 main 占用，acquire2 加入到锁的等待队列中。
-  //   同时将 acquire2 的优先级捐赠给 main
+
   lock_acquire (lock);
   msg ("acquire2: got the lock");
-  //（6）释放lock，acquire2 的优先级比 acquire1 和 main 高，继续执行直到结束
   lock_release (lock);
   msg ("acquire2: done");
 }

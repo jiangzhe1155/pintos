@@ -25,7 +25,7 @@ static thread_func b_thread_func;
 static thread_func c_thread_func;
 
 void
-test_priority_donate_multiple2 (void) 
+test_priority_donate_multiple2 (void)
 {
   struct lock a, b;
 
