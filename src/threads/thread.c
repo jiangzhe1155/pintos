@@ -621,11 +621,10 @@ int thread_current_max_priority(struct thread *t){
     struct list_elem *e;
     struct list *list = &t->hold_locks;
     for (e = list_begin(list); e != list_end(list); e = list_next(e)) {
-        struct lock *c = list_entry(e,
-        struct lock, elem);
-        if (!list_empty(&(&c->semaphore)->waiters)) {
-            struct thread *tmp = list_entry(list_begin(&(&c->semaphore)->waiters),
-            struct thread, elem);
+        struct lock *c = list_entry(e,struct lock, elem);
+        struct list waiters = (&c->semaphore)->waiters;
+        if (!list_empty(&waiters)) {
+            struct thread *tmp = list_entry(list_begin(&waiters),struct thread, elem);
             if (tmp->priority > max) {
                 max = tmp->priority;
             }

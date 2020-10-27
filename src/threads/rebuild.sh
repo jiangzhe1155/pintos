@@ -2,5 +2,5 @@
 
 echo $(make clean)
 echo $(make)
-echo $(pintos --gdb -- run priority-donate-one)
+echo $(pintos --gdb -- run priority-donate-sema)
 sleep 3

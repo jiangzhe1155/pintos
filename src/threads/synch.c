@@ -65,7 +65,7 @@ sema_down(struct semaphore *sema) {
 
     old_level = intr_disable();
     while (sema->value == 0) {
-        list_insert_ordered(&sema->waiters, &thread_current()->elem, thread_priority_compare_func, NULL);
+        list_push_ordered(&sema->waiters, &thread_current()->elem, thread_priority_compare_func, NULL);
         thread_block();
     }
     sema->value--;
@@ -106,8 +106,8 @@ sema_up(struct semaphore *sema) {
     ASSERT(sema != NULL);
 
     old_level = intr_disable();
-        if (!list_empty(&sema->waiters)) {
-            //手动唤醒锁等待队列的头部线程
+    if (!list_empty(&sema->waiters)) {
+        //手动唤醒锁等待队列的头部线程
         list_sort(&sema->waiters, thread_priority_compare_func, NULL);
         thread_unblock(list_entry(list_pop_front(&sema->waiters),struct thread, elem));
     }
@@ -243,16 +243,12 @@ lock_release(struct lock *lock) {
     enum intr_level old_level;
     ASSERT(lock != NULL);
     ASSERT(lock_held_by_current_thread(lock));
-
-    //锁释放只能是正在运行的线程
     struct thread *t = lock->holder;
 
     list_remove(lock);
     t->priority = thread_current_max_priority(t);
     lock->holder = NULL;
     sema_up(&lock->semaphore);
-
-    // 让出当前线程
     thread_yield();
 }
 
