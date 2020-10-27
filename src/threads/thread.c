@@ -202,7 +202,7 @@ thread_create(const char *name, int priority,
     thread_unblock(t);
 
     if (priority >= thread_current()->priority) {
-        //主动调度
+        //抢占式调度
         thread_yield();
     }
     return tid;
@@ -239,7 +239,7 @@ thread_unblock(struct thread *t) {
 
     old_level = intr_disable();
     ASSERT(t->status == THREAD_BLOCKED);
-    // 改为优先级插入
+    //优先级插入
     list_insert_ordered(&ready_list, &t->elem, thread_priority_compare_func, NULL);
     t->status = THREAD_READY;
     intr_set_level(old_level);
@@ -306,7 +306,7 @@ thread_yield(void) {
 
     old_level = intr_disable();
     if (cur != idle_thread)
-        // 改为优先级插入
+        //优先级插入
         list_insert_ordered(&ready_list, &cur->elem, thread_priority_compare_func, NULL);
     cur->status = THREAD_READY;
     schedule();
@@ -338,7 +338,7 @@ thread_set_priority(int new_priority) {
         t->priority = new_priority;
     } else {
         t->priority = thread_current_max_priority(t);
-        // 重新调度
+        //重新调度
         thread_yield();
     }
 
@@ -555,10 +555,8 @@ schedule(void) {
     ASSERT(is_thread(next));
 
     if (cur != next)
-        //返回值 prev == cur
         prev = switch_threads(cur, next);
 
-    //线程调度收尾工作
     thread_schedule_tail(prev);
 }
 
@@ -591,9 +589,7 @@ void thread_ticks_block_check(struct thread *t, void *aux) {
 }
 
 bool thread_priority_compare_func(struct list_elem *a, struct list_elem *b, void *aux) {
-    return list_entry(a,
-    struct thread, elem)->priority > list_entry(b,
-    struct thread, elem)->priority;
+    return list_entry(a,struct thread, elem)->priority > list_entry(b,struct thread, elem)->priority;
 }
 
 void thread_reorder_priority(struct thread *t) {
@@ -605,7 +601,6 @@ void thread_donate(struct thread *t,int priority) {
     if (t->priority < priority) {
         t->priority = priority;
 
-        //此时lock->holder只有准备运行和 阻塞两种状态
         if (t->status == THREAD_READY) {
             thread_reorder_priority(t);
         }
